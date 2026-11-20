@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commute Policy Assistant</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-icon">🚗</div>
+        <div>
+          <h1>Commute Policy Assistant</h1>
+          <p class="subtitle">Multi-Tenant Grounded Policy Assistant</p>
+        </div>
+      </div>
+      <div id="user-status-bar" class="user-status-bar hidden">
+        <div class="badge-container">
+          <span id="tenant-badge" class="badge tenant-badge"></span>
+          <span id="role-badge" class="badge role-badge"></span>
+          <span id="user-display" class="user-display"></span>
+        </div>
+        <button id="logout-btn" class="btn btn-secondary btn-sm" aria-label="Sign out">Sign Out</button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Authentication Card (shown when logged out) -->
+      <section id="auth-section" class="card auth-card" aria-labelledby="auth-heading">
+        <h2 id="auth-heading">Demo Sign In</h2>
+        <p class="help-text">Select a predefined fictional account or enter demo credentials to obtain a signed JWT.</p>
+        
+        <div class="quick-login-grid">
+          <div class="quick-group">
+            <h3>Aurora Healthcare</h3>
+            <button class="btn btn-outline quick-login-btn" data-user="aurora_employee" data-pass="demo123">
+              Aurora Employee
+            </button>
+            <button class="btn btn-outline quick-login-btn" data-user="aurora_admin" data-pass="demo123">
+              Aurora Admin
+            </button>
+          </div>
+          <div class="quick-group">
+            <h3>BluePeak Tech</h3>
+            <button class="btn btn-outline quick-login-btn" data-user="bluepeak_employee" data-pass="demo123">
+              BluePeak Employee
+            </button>
+            <button class="btn btn-outline quick-login-btn" data-user="bluepeak_admin" data-pass="demo123">
+              BluePeak Admin
+            </button>
+          </div>
+          <div class="quick-group">
+            <h3>Cedar Logistics</h3>
+            <button class="btn btn-outline quick-login-btn" data-user="cedar_employee" data-pass="demo123">
+              Cedar Employee
+            </button>
+            <button class="btn btn-outline quick-login-btn" data-user="cedar_admin" data-pass="demo123">
+              Cedar Admin
+            </button>
+          </div>
+        </div>
+
+        <form id="login-form" class="login-form">
+          <div class="form-row">
+            <label for="username">Username</label>
+            <input type="text" id="username" required placeholder="e.g. aurora_employee">
+          </div>
+          <div class="form-row">
+            <label for="password">Password</label>
+            <input type="password" id="password" required value="demo123">
+          </div>
+          <button type="submit" id="login-btn" class="btn btn-primary">Sign In</button>
+          <div id="login-error" class="error-banner hidden" role="alert"></div>
+        </form>
+      </section>
+
+      <!-- Authenticated Assistant Interface -->
+      <div id="workspace-section" class="workspace-grid hidden">
+        <!-- Chat & QA Panel -->
+        <section class="card chat-card" aria-labelledby="chat-heading">
+          <h2 id="chat-heading">Ask Your Policy</h2>
+          
+          <div class="example-chips">
+            <span class="chips-label">Quick Prompts:</span>
+            <button class="chip" data-q="When is a security escort needed for a woman's drop?">Escort Rules</button>
+            <button class="chip" data-q="Can I book a cab this Saturday?">Saturday Cab</button>
+            <button class="chip" data-q="Who approves an airport cab ride?">Airport Approvals</button>
+            <button class="chip" data-q="What is the penalty for a no-show?">No-Show Penalty</button>
+            <button class="chip chip-unans" data-q="Can I bring my pet dog in the commute cab?">Pet Travel (Uncovered)</button>
+            <button class="chip chip-trap" data-q="What does BluePeak say about escort after 10 PM?">Cross-Tenant Trap</button>
+          </div>
+
+          <form id="ask-form" class="ask-form">
+            <div class="input-wrapper">
+              <label for="question-input" class="sr-only">Your transport policy question</label>
+              <textarea id="question-input" rows="3" required placeholder="Ask about shift timings, escort, weekend travel, cut-offs..."></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit" id="ask-btn" class="btn btn-primary">Submit Question</button>
+            </div>
+          </form>
+
+          <div id="ask-loading" class="loading-indicator hidden" aria-live="polite">
+            <div class="spinner"></div>
+            <span>Checking active company policy...</span>
+          </div>
+
+          <div id="chat-history" class="chat-history" aria-live="polite"></div>
+        </section>
+
+        <!-- Admin Policy Ingestion Panel (visible only for admin users) -->
+        <section id="admin-panel" class="card admin-panel hidden" aria-labelledby="admin-heading">
+          <h2 id="admin-heading">Admin Policy Upload</h2>
+          <p class="help-text">Upload an updated policy version for your company. Ingestion is atomic: verified before activation.</p>
+
+          <div class="active-policy-info">
+            <h3>Active Policy Snapshot</h3>
+            <div id="active-policy-display" class="policy-snapshot-box">Loading...</div>
+          </div>
+
+          <form id="policy-upload-form" class="policy-upload-form">
+            <div class="form-row">
+              <label for="policy-version">New Version Number</label>
+              <input type="number" id="policy-version" min="1" step="1" required placeholder="e.g. 2">
+            </div>
+            <div class="form-row">
+              <label for="policy-title">Document Title</label>
+              <input type="text" id="policy-title" required placeholder="e.g. Aurora Employee Transport Policy">
+            </div>
+            <div class="form-row">
+              <label for="policy-file">Policy File (.md or .txt)</label>
+              <input type="file" id="policy-file" accept=".md,.txt" required>
+            </div>
+            <button type="submit" id="upload-btn" class="btn btn-primary">Ingest &amp; Activate</button>
+            <div id="upload-status" class="status-box hidden" role="status"></div>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <p>Commute Policy Assistant &bull; Case Study B Implementation &bull; Local Offline Verified</p>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
